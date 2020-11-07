@@ -98,9 +98,9 @@ input, select, textarea {
 		}
 
 	body, input, select, textarea {
-		color: #a2a2a2;
+		color: #9a9a9a;
 		font-family: "Source Sans Pro", Helvetica, sans-serif;
-		font-size: 16pt;
+		font-size: 14pt;
 		font-weight: 400;
 		line-height: 1.75em;
 	}
@@ -110,7 +110,6 @@ input, select, textarea {
 		-webkit-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 		-ms-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 		transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-		border-bottom: dotted 1px;
 		color: #2fa3bc;
 		text-decoration: none;
 	}
@@ -1895,7 +1894,7 @@ input, select, textarea {
 		input[type="checkbox"] + label,
 		input[type="radio"] + label {
 			text-decoration: none;
-			color: #a2a2a2;
+			color: #9a9a9a;
 			cursor: pointer;
 			display: inline-block;
 			font-size: 1em;
@@ -2567,7 +2566,7 @@ input, select, textarea {
 		}
 
 		.work-item p {
-			font-size: 0.8em;
+			font-size: 0.9em;
 			line-height: 1.5em;
 			margin: 0;
 		}
@@ -2634,20 +2633,20 @@ input, select, textarea {
 		#header h1 {
 			color: rgba(255, 255, 255, 0.5);
 			font-size: 2.00em;
-			line-height: 2.20em;
+			line-height: 2.60em;
 			margin: 0;
 		}
 
 		#header h2 {
 			color: rgba(255, 255, 255, 0.60);
-			font-size: 1.20em;
-			line-height: 1.50em;
+			font-size: 1.40em;
+			line-height: 1.40em;
 			margin: 0;
 		}
 
 		#header .image.avatar {
-			margin: 0 0 1em 0;
-			width: 6.25em;
+			margin: 0 0 0 0;
+			width: 6.75em;
 		}
 
 /* Footer */
