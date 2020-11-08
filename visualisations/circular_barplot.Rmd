@@ -1,0 +1,118 @@
+---
+title: "Visualising market opportunities with a circular barplot"
+author: "Edgar Brea"
+date: "15/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(RColorBrewer)
+library(treemap)
+```
+
+```{r import_data, include=FALSE}
+data_raw_Cyb <- read_excel("~/OneDrive - The University of Queensland/03 CSIRO CPS Strategic Opportunities/05 Data/Phase 2/Technavio Reports/Technavio market data - R ready/market_segments_Cyb.xlsx")
+data_raw_DSS <- read_excel("~/OneDrive - The University of Queensland/03 CSIRO CPS Strategic Opportunities/05 Data/Phase 2/Technavio Reports/Technavio market data - R ready/market_segments_DSS.xlsx")
+data_raw_ICV <- read_excel("~/OneDrive - The University of Queensland/03 CSIRO CPS Strategic Opportunities/05 Data/Phase 2/Technavio Reports/Technavio market data - R ready/market_segments_ICV.xlsx")
+data_raw_RAS <- read_excel("~/OneDrive - The University of Queensland/03 CSIRO CPS Strategic Opportunities/05 Data/Phase 2/Technavio Reports/Technavio market data - R ready/market_segments_RAS.xlsx")
+data_raw <- rbind(data_raw_Cyb, data_raw_DSS, data_raw_ICV, data_raw_RAS)
+```
+
+```{r tidy_data, include=FALSE}
+#calculate means across 3yr columns
+data <- data_raw %>% 
+  mutate(mean_size = rowMeans(select(., starts_with("size_million_")), na.rm = T), mean_growth = rowMeans(select(., starts_with("yoy_growth_perc_")), na.rm = T))
+data <- data[,c(1,2,4,11,12)]
+
+#compute ranks
+data <- data %>%
+  group_by(segmentation_type_2) %>%
+  mutate(rank_size = dplyr::dense_rank(desc(mean_size)), rank_growth = dplyr::dense_rank(desc(mean_growth))) #dense rank sets same rank to ties, and leaves no gap for the following rank
+
+#filter segments to get top 20 in size and/or growth on each segment type
+data_top20 <- data %>%
+  group_by(segmentation_type_2) %>%
+  filter(rank_size <= 20 | rank_growth <= 20)
+
+#set labels for plot
+data$label <- ifelse(data$rank_size <= 1 | data$rank_growth <= 1, paste0(data$market_name, ">", data$market_segment_name), "")
+```
+
+We can have a look at the data:
+
+```{r describe_data}
+head(data_top20)
+```
+
+```{r format_data, include=FALSE}
+my_segm_type2 <- "application" #application, user, product
+
+data_to_plot <- data.frame(filter(data_top20, segmentation_type_2 == my_segm_type2))
+data_to_plot$market_name <- gsub("Global", "", data_to_plot$market_name) #remove "global" from market names
+data_to_plot$market_name <- gsub("Market", "", data_to_plot$market_name) #remove "Market" from market names
+data_to_plot$market_name <- gsub("market", "", data_to_plot$market_name) #remove "market" from market names
+data_to_plot$market_name <- as.factor(data_to_plot$market_name)
+data_to_plot$mean_size <- data_to_plot$mean_size/1000 #make them $Billion rather than $Million
+
+# Set a number of 'empty bar' to add at the end of each group (market), then rbind it to the data to plot
+empty_bar <- 1
+to_add <- data.frame(matrix(NA, empty_bar*nlevels(data_to_plot$market_name), ncol(data_to_plot)))
+colnames(to_add) <- colnames(data_to_plot)
+to_add$market_name <- rep(levels(data_to_plot$market_name), each=empty_bar)
+data_to_plot <- rbind(data_to_plot, to_add)
+data_to_plot <- data_to_plot %>% arrange(market_name)
+data_to_plot$id <- seq(1, nrow(data_to_plot)) # add id
+
+# data frame with thw name and the y position of each label
+label_data <- data_to_plot
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) / number_of_bar # Substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse(angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# data frame with additional info to plot group (parent markets) labels
+base_data <- data_to_plot %>% 
+  group_by(market_name) %>% 
+  summarize(start = min(id), end = max(id) - empty_bar) %>% 
+  rowwise() %>% 
+  mutate(title = mean(c(start, end)))
+
+# vectors with 4 breaks of the y axis for size and growth (to plot horizontal/circular lines)
+my_y_axis <- c(max(data_to_plot$mean_size, na.rm = T)/4*1, max(data_to_plot$mean_size, na.rm = T)/4*2, max(data_to_plot$mean_size, na.rm = T)/4*3, max(data_to_plot$mean_size, na.rm = T)/4*4)
+my_y_axis <- round(my_y_axis)
+my_y_axis_sec <- c(max(data_to_plot$mean_growth, na.rm = T)/4*1, max(data_to_plot$mean_growth, na.rm = T)/4*2, max(data_to_plot$mean_growth, na.rm = T)/4*3, max(data_to_plot$mean_growth, na.rm = T)/4*4)
+my_y_axis_sec <- round(my_y_axis_sec)
+
+data_to_plot$max_size <- ifelse(!is.na(data_to_plot$market_segment_name), max(data_to_plot$mean_size, na.rm = T), NA)
+```
+
+```{r plot, message=FALSE, warning=FALSE}
+ggplot(data_to_plot, aes(x = as.factor(id), y = mean_size, fill = market_name)) +
+  geom_hline(yintercept = my_y_axis[4], colour = "grey", size = .15) +
+  geom_hline(yintercept = my_y_axis[3], colour = "grey", size = .15) +
+  geom_hline(yintercept = my_y_axis[2], colour = "grey", size = .15) +
+  geom_hline(yintercept = my_y_axis[1], colour = "grey", size = .15) +
+  geom_hline(yintercept = 0, colour = "grey", size = .15) +
+  geom_bar(aes(x = as.factor(id), y = max_size), fill = "white", colour = "white", stat = "identity") + #dummy bars in white to cut through the axis lines
+  geom_bar(aes(x = as.factor(id), y = mean_size, fill = market_name), stat = "identity") + #market size
+  geom_point(aes(x = as.factor(id), y = mean_growth/5.5, fill = market_name), colour = "grey30", shape = 21, stroke = 1.25) + #market growth
+  scale_y_continuous(sec.axis = sec_axis(trans=~.*5.5)) +
+  annotate("text", x = rep(max(data_to_plot$id),4), y = my_y_axis, label = paste0(as.character(my_y_axis), "$B|", as.character(my_y_axis_sec), "%"), color="grey60", size=3 , angle=0, fontface="bold", hjust=0.5) +
+  ylim(-30, 35) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-3,4), "cm")) +
+  coord_polar() + 
+  geom_text(data = label_data, aes(x = id, y = 0.1, label = market_segment_name, hjust = hjust), color = "grey36", fontface = "bold", size = 2.75, angle = label_data$angle, inherit.aes = F) + #market segment labels
+  geom_text(data = base_data, aes(x = title, y = 30, label = market_name, colour = market_name), size = 3.25, fontface = "bold", inherit.aes = F) + #market label
+  ggtitle(paste0("Top largest and fastest growing market segments and corresponding parent markets (segmented by ", my_segm_type2, ""))
+```
