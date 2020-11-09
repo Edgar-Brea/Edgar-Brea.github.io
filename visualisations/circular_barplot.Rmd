@@ -1,5 +1,5 @@
 ---
-title: "Visualising market opportunities with a circular barplot"
+title: "Visualising robotics market opportunities with a circular barplot"
 author: "Edgar Brea"
 date: "15/10/2020"
 output: html_document
@@ -13,16 +13,18 @@ output: html_document
 }
 </style>
 
-The goal with this plot is to show the largest and fastest growing markets for robotics products and services worldwide. The data comes from a leading market research company that focus on emerging technologies. The plot includes market segments and corresponding parent markets on the top. The bars indicate the market size (calculated as the average size in USDBillion for the 2020-22 period), and the circles the market growth (calculated as the average year-over-year growth percentage for the 2020-22 period).
+This plot compares the market size and growth for top 7 global markets for robotics products and services. The data comes from a leading market research company with a focus on emerging technologies. The plot shows parent markets and corresponding segments.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
 library(readxl)
 library(dplyr)
 library(ggplot2)
 library(plotly)
 library(RColorBrewer)
 library(treemap)
+library(stringr)
 ```
 
 ```{r import_data, include=FALSE}
@@ -39,30 +41,42 @@ data <- data_raw %>%
   mutate(mean_size = rowMeans(select(., starts_with("size_million_")), na.rm = T), mean_growth = rowMeans(select(., starts_with("yoy_growth_perc_")), na.rm = T))
 data <- data[,c(1,2,4,11,12)]
 
-#compute ranks
+#leave only robot markets:
 data <- data %>%
-  group_by(segmentation_type_2) %>%
-  mutate(rank_size = dplyr::dense_rank(desc(mean_size)), rank_growth = dplyr::dense_rank(desc(mean_growth))) #dense rank sets same rank to ties, and leaves no gap for the following rank
+  filter(str_detect(market_name, "Robot"))
 
-#filter segments to get top 20 in size and/or growth on each segment type
-data_top20 <- data %>%
-  group_by(segmentation_type_2) %>%
-  filter(rank_size <= 20 | rank_growth <= 20)
+#leave only segmentation by application:
+data <- data %>%
+  filter(segmentation_type_2 == "application")
+
+#count markets' segments:
+data <- data %>%
+  group_by(market_name) %>%
+  mutate(no_segments = n())
+
+#filter markets to get those with 4 segments or more:
+data <- data %>%
+  filter(no_segments >= 5)
+
+#set data to show:
+data_vis <- data %>%
+  group_by(market_name) %>%
+  summarise("number_of_segments" = max(no_segments), "total_size_USDM" = round(sum(mean_size), 2), "avg_growth_rate_YoY_pct" = round(mean(mean_growth), 2))
+data_vis <- data.frame(data_vis)
 
 #set labels for plot
-data$label <- ifelse(data$rank_size <= 1 | data$rank_growth <= 1, paste0(data$market_name, ">", data$market_segment_name), "")
+data$market_segment_name <- ifelse(nchar(data$market_segment_name) <= 25, data$market_segment_name, paste0(substr(data$market_segment_name,1,25), "..."))
+data$market_name <- str_wrap(data$market_name, width = 15)
 ```
 
-A glimpse of the data:
+A summary of the market data used for the plot (parent market level):
 
 ```{r describe_data}
-head(data_top20)
+kable(data_vis)
 ```
 
 ```{r format_data, include=FALSE}
-my_segm_type2 <- "application" #application, user, product
-
-data_to_plot <- data.frame(filter(data_top20, segmentation_type_2 == my_segm_type2))
+data_to_plot <- data.frame(data)
 data_to_plot$market_name <- gsub("Global", "", data_to_plot$market_name) #remove "global" from market names
 data_to_plot$market_name <- gsub("Market", "", data_to_plot$market_name) #remove "Market" from market names
 data_to_plot$market_name <- gsub("market", "", data_to_plot$market_name) #remove "market" from market names
@@ -94,14 +108,14 @@ base_data <- data_to_plot %>%
 
 # vectors with 4 breaks of the y axis for size and growth (to plot horizontal/circular lines)
 my_y_axis <- c(max(data_to_plot$mean_size, na.rm = T)/4*1, max(data_to_plot$mean_size, na.rm = T)/4*2, max(data_to_plot$mean_size, na.rm = T)/4*3, max(data_to_plot$mean_size, na.rm = T)/4*4)
-my_y_axis <- round(my_y_axis)
+my_y_axis <- round(my_y_axis,1)
 my_y_axis_sec <- c(max(data_to_plot$mean_growth, na.rm = T)/4*1, max(data_to_plot$mean_growth, na.rm = T)/4*2, max(data_to_plot$mean_growth, na.rm = T)/4*3, max(data_to_plot$mean_growth, na.rm = T)/4*4)
 my_y_axis_sec <- round(my_y_axis_sec)
 
 data_to_plot$max_size <- ifelse(!is.na(data_to_plot$market_segment_name), max(data_to_plot$mean_size, na.rm = T), NA)
 ```
 
-The plot code using ggplot:
+The plot was developed using R's ggplot2 package, and it combines barplots and scatter plots arranged in a polar coordinate system. Below is the R code:
 
 ```{r plot, message=FALSE, warning=FALSE, fig.width=12, fig.height=12, fig.align="center"}
 ggplot(data_to_plot, aes(x = as.factor(id), y = mean_size, fill = market_name)) +
@@ -110,12 +124,11 @@ ggplot(data_to_plot, aes(x = as.factor(id), y = mean_size, fill = market_name)) 
   geom_hline(yintercept = my_y_axis[2], colour = "grey", size = .15) +
   geom_hline(yintercept = my_y_axis[1], colour = "grey", size = .15) +
   geom_hline(yintercept = 0, colour = "grey", size = .15) +
-  geom_bar(aes(x = as.factor(id), y = max_size), fill = "white", colour = "white", stat = "identity") + #dummy bars in white to cut through the axis lines
-  geom_bar(aes(x = as.factor(id), y = mean_size, fill = market_name), stat = "identity") + #market size
-  geom_point(aes(x = as.factor(id), y = mean_growth/5.5, fill = market_name), colour = "grey30", shape = 21, stroke = 1.25) + #market growth
-  scale_y_continuous(sec.axis = sec_axis(trans=~.*5.5)) +
-  annotate("text", x = rep(max(data_to_plot$id),4), y = my_y_axis, label = paste0(as.character(my_y_axis), "$B|", as.character(my_y_axis_sec), "%"), color="grey60", size=3 , angle=0, fontface="bold", hjust=0.5) +
-  ylim(-20, 35) +
+  geom_bar(aes(x = as.factor(id), y = mean_size, fill = market_name), stat = "identity", width = 0.6) + #market size
+  geom_point(aes(x = as.factor(id), y = mean_growth/30, fill = market_name), colour = "grey30", shape = 21, size = 2, stroke = .75) + #market growth
+  scale_y_continuous(limits = c(0,10), sec.axis = sec_axis(trans = ~.*30)) +
+  annotate("text", x = rep(max(data_to_plot$id),4), y = my_y_axis, label = paste0("$", as.character(my_y_axis), "B|", as.character(my_y_axis_sec), "%"), color="grey55", size = 2.5 , angle = 0, fontface="bold", hjust=0.5) +
+  ylim(-5, 5) +
   theme_minimal() +
   theme(
     legend.position = "none",
@@ -124,7 +137,12 @@ ggplot(data_to_plot, aes(x = as.factor(id), y = mean_size, fill = market_name)) 
     plot.title = element_text(hjust = 0.5),
     panel.grid = element_blank()) +
   coord_polar() + 
-  geom_text(data = label_data, aes(x = id, y = 0.1, label = market_segment_name, hjust = hjust), color = "grey36", fontface = "bold", size = 2.75, angle = label_data$angle, inherit.aes = F) + #market segment labels
-  geom_text(data = base_data, aes(x = title, y = 30, label = market_name, colour = market_name), size = 3.25, fontface = "bold", inherit.aes = F) + #market label
-  ggtitle(paste0("Top largest and fastest growing market segments and corresponding parent markets (segmented by ", my_segm_type2, ""))
+  geom_text(data = label_data, aes(x = id, y = 0.1, label = market_segment_name, hjust = hjust), color = "grey25", fontface = "bold", size = 2.75, angle = label_data$angle, inherit.aes = F) + #market segment labels
+  geom_segment(data=base_data, aes(x = start, y = -0.25, xend = end, yend = -.25), colour = "black", alpha=0.8, size=0.7 , inherit.aes = FALSE )  +
+  geom_text(data = base_data, aes(x = title, y = -1.3, label = market_name, colour = market_name), size = 3.25, fontface = "bold", inherit.aes = F) + #market label
+  geom_text(x = 0, y = 5, label = "Top largest and fastest growing market segments for robotics products and services", size = 6) + #title
+  geom_text(x = 0, y = 4.25, label = "Average for 2020-22 period. Bars represent market size in US$ Billion. Dots represent year-over-year percentage growth.", size = 3.75) #subtitle
 ```
+Thanks to the plot, we see that, although the **Industrial Robot Sensors** and the **Vision Guided Robotics** markets are the largest markets currently, they are not expected to grow substantially in the coming years. Rather, we expect to see a significant growth in **Collaborative Robots**, **Professional Cleaning Robots** and **Agricultural Robots** markets in the coming years. This suggest a gradual shift from the application of robotics in typical industrial settings characterised by repetitive tasks, to the **application of robotics in collaborative, commercial and outdoor environments characterised by unstructured, more dynamic tasks**, a trend likely to be influenced by **recent developments in machine learning and robot dexterity**.
+
+
