@@ -135,7 +135,8 @@ ggplot(data_to_plot, aes(x = as.factor(id), y = mean_size, fill = market_name)) 
     axis.text = element_blank(),
     axis.title = element_blank(),
     plot.title = element_text(hjust = 0.5),
-    panel.grid = element_blank()) +
+    panel.grid = element_blank(),
+    plot.margin = unit(c(-3,-3,-6,-3), "cm")) +
   coord_polar() + 
   geom_text(data = label_data, aes(x = id, y = 0.1, label = market_segment_name, hjust = hjust), color = "grey25", fontface = "bold", size = 2.75, angle = label_data$angle, inherit.aes = F) + #market segment labels
   geom_segment(data=base_data, aes(x = start, y = -0.25, xend = end, yend = -.25), colour = "black", alpha=0.8, size=0.7 , inherit.aes = FALSE )  +
