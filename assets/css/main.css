@@ -98,7 +98,7 @@ input, select, textarea {
 		}
 
 	body, input, select, textarea {
-		color: #9a9a9a;
+		color: #8d8d8d;
 		font-family: "Source Sans Pro", Helvetica, sans-serif;
 		font-size: 14pt;
 		font-weight: 400;
@@ -110,13 +110,13 @@ input, select, textarea {
 		-webkit-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 		-ms-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 		transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-		color: #2fa3bc;
+		color: #45ada8;
 		text-decoration: none;
 	}
 
 		a:hover {
 			border-bottom-color: transparent;
-			color: #2fa3bc !important;
+			color: #45ada8 !important;
 			text-decoration: none;
 		}
 
@@ -151,7 +151,7 @@ input, select, textarea {
 	}
 
 	h2 {
-		font-size: 1.5em;
+		font-size: 1.6em;
 		line-height: 1.5em;
 	}
 
@@ -1840,7 +1840,7 @@ input, select, textarea {
 		input[type="email"]:focus,
 		select:focus,
 		textarea:focus {
-			border-color: #2fa3bc;
+			border-color: #45ada8;
 		}
 
 	select {
@@ -1894,7 +1894,7 @@ input, select, textarea {
 		input[type="checkbox"] + label,
 		input[type="radio"] + label {
 			text-decoration: none;
-			color: #9a9a9a;
+			color: #8d8d8d;
 			cursor: pointer;
 			display: inline-block;
 			font-size: 1em;
@@ -1945,7 +1945,7 @@ input, select, textarea {
 
 		input[type="checkbox"]:focus + label:before,
 		input[type="radio"]:focus + label:before {
-			border-color: #2fa3bc;
+			border-color: #45ada8;
 		}
 
 	input[type="checkbox"] + label:before {
@@ -2143,6 +2143,7 @@ input, select, textarea {
 			.image.avatar img {
 				border-radius: 100%;
 				width: 100%;
+				border: 5px solid #45ada8;
 			}
 
 /* List */
@@ -2463,8 +2464,8 @@ input, select, textarea {
 		input[type="reset"]:hover,
 		input[type="button"]:hover,
 		.button:hover {
-			border-color: #2fa3bc;
-			color: #2fa3bc !important;
+			border-color: #45ada8;
+			color: #45ada8 !important;
 		}
 
 		input[type="submit"]:active,
@@ -2472,8 +2473,8 @@ input, select, textarea {
 		input[type="button"]:active,
 		.button:active {
 			background-color: rgba(73, 191, 157, 0.1);
-			border-color: #2fa3bc;
-			color: #2fa3bc !important;
+			border-color: #45ada8;
+			color: #45ada8 !important;
 		}
 
 		input[type="submit"].icon,
@@ -2516,8 +2517,8 @@ input, select, textarea {
 		input[type="reset"].primary,
 		input[type="button"].primary,
 		.button.primary {
-			background-color: #2fa3bc;
-			border-color: #2fa3bc;
+			background-color: #45ada8;
+			border-color: #45ada8;
 			color: #ffffff !important;
 		}
 
@@ -2525,8 +2526,8 @@ input, select, textarea {
 			input[type="reset"].primary:hover,
 			input[type="button"].primary:hover,
 			.button.primary:hover {
-				background-color: #2fa3bc;
-				border-color: #2fa3bc;
+				background-color: #45ada8;
+				border-color: #45ada8;
 			}
 
 			input[type="submit"].primary:active,
@@ -2566,7 +2567,7 @@ input, select, textarea {
 		}
 
 		.work-item p {
-			font-size: 0.9em;
+			font-size: 0.95em;
 			line-height: 1.5em;
 			margin: 0;
 		}
@@ -2592,18 +2593,18 @@ input, select, textarea {
 		justify-content: space-between;
 		background-color: #2a292e;
 		background-attachment: scroll,								scroll;
-		background-image: url("images/overlay.png"), url("../../images/mohammad-alizade-XgeZu2jBaVI-unsplash.jpg");
+		background-image: url("images/overlay.png"), url("../../images/pexels-cottonbro-3826431.jpg");
 		background-position: top left,							top left;
 		background-repeat: repeat,								no-repeat;
 		background-size: auto,								150%;
 		color: rgba(255, 255, 255, 0.5);
 		height: 100%;
 		left: 0;
-		padding: 8em 4em;
+		padding: 8em 3em;
 		position: fixed;
 		text-align: right;
 		top: 0;
-		width: 35%;
+		width: 33%;
 	}
 
 		#header > * {
@@ -2632,15 +2633,15 @@ input, select, textarea {
 
 		#header h1 {
 			color: rgba(255, 255, 255, 0.5);
-			font-size: 2.00em;
-			line-height: 2.60em;
-			margin: 0;
+			font-size: 2.10em;
+			line-height: 2em;
+			margin: 1;
 		}
 
 		#header h2 {
-			color: rgba(255, 255, 255, 0.60);
-			font-size: 1.40em;
-			line-height: 1.40em;
+			color: rgba(255, 255, 255, 0.65);
+			font-size: 1.25em;
+			line-height: 1.6em;
 			margin: 0;
 		}
 
@@ -2656,11 +2657,11 @@ input, select, textarea {
 	}
 
 		#footer .icons a {
-			color: rgba(255, 255, 255, 0.4);
+			color: rgba(255, 255, 255, 0.8);
 		}
 
 	#footer .copyright {
-		color: rgba(255, 255, 255, 0.4);
+		color: rgba(255, 255, 255, 0.6);
 		font-size: 0.8em;
 		list-style: none;
 		margin: 1em 0 0 0;
@@ -2688,16 +2689,16 @@ input, select, textarea {
 /* Main */
 
 	#main {
-		margin-left: 37%;
+		margin-left: 33%;
 		max-width: 60em;
-		padding: 8em 4em 4em 4em;
+		padding: 4em 4em 4em 4em;
 		width: calc(100% - 35%);
 	}
 
 		#main > section {
 			border-top: solid 2px #efefef;
-			margin: 4em 0 0 0;
-			padding: 4em 0 0 0;
+			margin: 3em 0 0 0;
+			padding: 3em 0 0 0;
 		}
 
 			#main > section:first-child {
@@ -2991,7 +2992,7 @@ input, select, textarea {
 		/* Basic */
 
 			body, input, select, textarea {
-				font-size: 12pt;
+				font-size: 14pt;
 			}
 
 	}
