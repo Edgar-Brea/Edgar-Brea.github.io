@@ -1697,7 +1697,7 @@ input, select, textarea {
 		button:hover,
 		.button:hover {
 			background-color: #a6711f;
-			color: #203a43 !important;
+			color: #244D5E !important;
             text-shadow: 0px 0px 0px;
 		}
 
@@ -2001,7 +2001,7 @@ input, select, textarea {
 	}
 
 		.wrapper.style1 {
-			background-image: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+			background-image: linear-gradient(to right, #203a43, #244D5E, #2c5364);
 			background-color: #0f2027;
             text-shadow: -1px -1px 0px #181818;
 		}
